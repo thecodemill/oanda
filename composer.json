@@ -13,5 +13,8 @@
         "psr-4": {
             "TheCodeMill\\OANDA\\Tests\\": "tests/"
         }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "~6.0"
     }
 }
