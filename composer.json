@@ -1,5 +1,6 @@
 {
     "name": "thecodemill/oanda",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "TheCodeMill\\OANDA\\": "src/"
