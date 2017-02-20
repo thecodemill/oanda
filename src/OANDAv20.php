@@ -171,6 +171,36 @@ class OANDAv20
     }
 
     /**
+     * Helper method to automatically send a POST request and return the HTTP response
+     *
+     * @param string $endpoint
+     * @param array $data Data to send (encoded) with request
+     * @param array $headers Additional headers to send with request
+     * @return mixed
+     */
+    protected function makePostRequest($endpoint, $data = [], $headers = [])
+    {
+        $request = $this->prepareRequest($endpoint, 'POST', $data, $headers);
+
+        return $this->sendRequest($request);
+    }
+
+    /**
+     * Helper method to automatically send a PATCH request and return the HTTP response
+     *
+     * @param string $endpoint
+     * @param array $data Data to send (encoded) with request
+     * @param array $headers Additional headers to send with request
+     * @return mixed
+     */
+    protected function makePatchRequest($endpoint, $data = [], $headers = [])
+    {
+        $request = $this->prepareRequest($endpoint, 'PATCH', $data, $headers);
+
+        return $this->sendRequest($request);
+    }
+
+    /**
      * Return the appropriate API base uri based on connection mode
      *
      * @return string
@@ -244,7 +274,7 @@ class OANDAv20
     }
 
     /**
-     * Get full account details for a particular account id
+     * Get full account details
      *
      * @param string $accountId
      * @return array
@@ -255,7 +285,7 @@ class OANDAv20
     }
 
     /**
-     * Get an account summary for a particular account id
+     * Get an account summary
      *
      * @param string $accountId
      * @return array
@@ -266,7 +296,7 @@ class OANDAv20
     }
 
     /**
-     * Get a list of tradeable instruments for a particular account id
+     * Get a list of tradeable instruments for an account
      *
      * @param string $accountId
      * @return array
@@ -280,27 +310,301 @@ class OANDAv20
      * Update the configurable properties of an account
      *
      * @param string $accountId
-     * @param array $body
+     * @param array $data
      * @return GuzzleHttp\Psr7\Response
      */
-    public function updateAccount($accountId, array $body)
+    public function updateAccount($accountId, array $data)
     {
-        $request = $this->prepareRequest('/v3/accounts/' . $accountId . '/configuration', 'PATCH', $body);
-
-        return $this->sendRequest($request);
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/configuration', $data);
     }
 
     /**
      * Get an account's changes to a particular account since a particular transaction id
      *
      * @param string $accountId
+     * @param array $data
+     * @return array
+     */
+    public function getAccountChanges($accountId, array $data)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/changes', $data);
+    }
+
+    /**
+     * Get candlestick data for an instrument
+     *
+     * @param string $instrumentName
+     * @param array $data
+     * @return array
+     */
+    public function getInstrumentCandles($instrumentName, array $data = [])
+    {
+        return $this->makeGetRequest('/v3/instruments/' . $instrumentName . '/candles', $data);
+    }
+
+    /**
+     * Create an order for an account
+     *
+     * @param string $accountId
+     * @param array $data
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function createOrder($accountId, array $data)
+    {
+        return $this->makePostRequest('/v3/accounts/' . $accountId . '/orders', $data);
+    }
+
+    /**
+     * Get a list of orders for an account
+     *
+     * @param string $accountId
+     * @param array $data
+     * @return array
+     */
+    public function getOrders($accountId, $data = [])
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/orders', $data);
+    }
+
+    /**
+     * Get a list of pending orders for an account
+     *
+     * @param string $accountId
+     * @return array
+     */
+    public function getPendingOrders($accountId)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/pendingOrders');
+    }
+
+    /**
+     * Get details of an order
+     *
+     * @param string $accountId
+     * @param string $orderSpecifier
+     * @return array
+     */
+    public function getOrder($accountId, $orderSpecifier)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/orders/' . $orderSpecifier);
+    }
+
+    /**
+     * Update an order by cancelling and replacing with a new one
+     *
+     * @param string $accountId
+     * @param string $orderSpecifier
+     * @param array $data
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function updateOrder($accountId, $orderSpecifier, array $data)
+    {
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/orders/' . $orderSpecifier, $data);
+    }
+
+    /**
+     * Cancel a pending order
+     *
+     * @param string $accountId
+     * @param string $orderSpecifier
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function cancelPendingOrder($accountId, $orderSpecifier)
+    {
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/orders/' . $orderSpecifier . '/cancel', $data);
+    }
+
+    /**
+     * Update Client Extensions for an order
+     *
+     * @param string $accountId
+     * @param string $orderSpecifier
+     * @param array $data
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function updateOrder($accountId, $orderSpecifier, array $data)
+    {
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/orders/' . $orderSpecifier . '/clientExtensions', $data);
+    }
+
+    /**
+     * Get a list of trades for an account
+     *
+     * @param string $accountId
+     * @param array $data
+     * @return array
+     */
+    public function getTrades($accountId, $data = [])
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/trades', $data);
+    }
+
+    /**
+     * Get a list of open trades for an account
+     *
+     * @param string $accountId
+     * @param array $data
+     * @return array
+     */
+    public function getOpenTrades($accountId)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/openTrades');
+    }
+
+    /**
+     * Get details of a trade
+     *
+     * @param string $accountId
+     * @param string $tradeSpecifier
+     * @return array
+     */
+    public function getTrade($accountId, $tradeSpecifier)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/trades/' . $tradeSpecifier);
+    }
+
+    /**
+     * Close (partially or fully) an open trade
+     *
+     * @param string $accountId
+     * @param string $tradeSpecifier
+     * @param array $data
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function closeTrade($accountId, $tradeSpecifier, array $data)
+    {
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/trades/' . $tradeSpecifier . '/close', $data);
+    }
+
+    /**
+     * Update the Client Extensions for an open trade
+     *
+     * @param string $accountId
+     * @param string $tradeSpecifier
+     * @param array $data
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function updateTradeClientExtensions($accountId, $tradeSpecifier, array $data)
+    {
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/trades/' . $tradeSpecifier . '/clientExtensions', $data);
+    }
+
+    /**
+     * Create, replace and cancel the dependent orders for an open trade
+     *
+     * @param string $accountId
+     * @param string $tradeSpecifier
+     * @param array $data
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function updateTradeOrders($accountId, $tradeSpecifier, array $data)
+    {
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/trades/' . $tradeSpecifier . '/orders', $data);
+    }
+
+    /**
+     * Get a list of all positions for an account
+     *
+     * @param string $accountId
+     * @return array
+     */
+    public function getPositions($accountId)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/positions');
+    }
+
+    /**
+     * Get a list of all open positions for an account
+     *
+     * @param string $accountId
+     * @return array
+     */
+    public function getOpenPositions($accountId)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/openPositions');
+    }
+
+    /**
+     * Get details of a single instrument's position in an account
+     *
+     * @param string $accountId
+     * @param string $instrumentName
+     * @return array
+     */
+    public function getInstrumentPosition($accountId, $instrumentName)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/positions/' . $instrumentName);
+    }
+
+    /**
+     * Close a position on an account
+     *
+     * @param string $accountId
+     * @param string $tradeSpecifier
+     * @param array $data
+     * @return GuzzleHttp\Psr7\Response
+     */
+    public function closePosition($accountId, $instrumentName, array $data)
+    {
+        return $this->makePatchRequest('/v3/accounts/' . $accountId . '/positions/' . $instrumentName . '/close', $data);
+    }
+
+    /**
+     * Get a paginated list of all transactions on an account
+     *
+     * @param string $accountId
+     * @return array
+     */
+    public function getTransactions($accountId, array $data = [])
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/transactions', $data);
+    }
+
+    /**
+     * Get a paginated list of all transactions on an account
+     *
+     * @param string $accountId
      * @param string $transactionId
      * @return array
      */
-    public function getAccountChanges($accountId, $transactionId)
+    public function getTransaction($accountId, $transactionId)
     {
-        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/changes', [
-            'sinceTransactionID' => $transactionId
-        ]);
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/transactions/' . $transactionId);
+    }
+
+    /**
+     * Get a range of transactions on an account
+     *
+     * @param string $accountId
+     * @param array $data
+     * @return array
+     */
+    public function getTransactionRange($accountId, array $data)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/transactions/idrange', $data);
+    }
+
+    /**
+     * Get a range of transactions since (but not including) a particular id
+     *
+     * @param string $accountId
+     * @param array $data
+     * @return array
+     */
+    public function getTransactionsSince($accountId, array $data)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/transactions/sinceid', $data);
+    }
+
+    /**
+     * Get pricing information for a list of instruments on an account
+     *
+     * @param string $accountId
+     * @param array $data
+     * @return array
+     */
+    public function getPricing($accountId, array $data)
+    {
+        return $this->makeGetRequest('/v3/accounts/' . $accountId . '/pricing', $data);
     }
 }
