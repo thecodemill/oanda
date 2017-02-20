@@ -422,7 +422,7 @@ class OANDAv20
      * @param array $data
      * @return GuzzleHttp\Psr7\Response
      */
-    public function updateOrder($accountId, $orderSpecifier, array $data)
+    public function updateOrderClientExtensions($accountId, $orderSpecifier, array $data)
     {
         return $this->makePatchRequest('/v3/accounts/' . $accountId . '/orders/' . $orderSpecifier . '/clientExtensions', $data);
     }
